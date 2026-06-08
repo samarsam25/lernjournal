@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lernjournal — Bewerbung & Deutsch</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a1a18;padding:1.5rem;}
+.wrap{max-width:960px;margin:0 auto;}
+h1{font-size:20px;font-weight:700;margin-bottom:1.25rem;color:#1a1a18;}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px;}
+.month-nav{display:flex;align-items:center;gap:10px;}
+.month-nav button{background:transparent;border:1px solid #bbb;border-radius:8px;padding:4px 12px;cursor:pointer;font-size:16px;color:#1a1a18;}
+.month-nav button:hover{background:#eee;}
+.month-title{font-size:17px;font-weight:700;min-width:140px;text-align:center;color:#1a1a18;}
+.btn-clear{font-size:13px;padding:4px 10px;border:1px solid #bbb;background:transparent;border-radius:8px;cursor:pointer;color:#888;}
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-bottom:1.25rem;}
+.stat-card{background:#fff;border-radius:8px;padding:8px 10px;text-align:center;border:0.5px solid #e0e0d8;}
+.stat-card .s-val{font-size:19px;font-weight:500;}
+.stat-card .s-lbl{font-size:12px;color:#555;margin-top:2px;font-weight:500;}
+.tbl-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:0.5px solid #e0e0d8;}
+table{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed;}
+thead th{padding:6px 3px;text-align:center;font-weight:700;color:#333;font-size:13px;border-bottom:1px solid #eee;background:#fafaf8;}
+thead th.date-col{text-align:left;width:82px;padding-left:8px;}
+.grp-apply{background:#f0f4fa !important;border-left:1px solid #ddd;}
+.grp-lang{background:#f0f8f4 !important;border-left:2px solid #aaa;}
+.sub-first{border-left:2px solid #aaa !important;}
+tbody tr{border-bottom:0.5px solid #eee;}
+tbody tr:hover{background:#fafaf8;}
+tbody tr.today-row .date-cell{font-weight:700;color:#185FA5;}
+.date-cell{padding:5px 4px 5px 8px;color:#444;font-size:13px;white-space:nowrap;}
+.date-cell .dow{font-size:12px;color:#888;}
+.check-cell{padding:3px 2px;text-align:center;cursor:pointer;user-select:none;}
+.check-cell.future{opacity:0.3;cursor:default;}
+.time-cell{padding:2px 2px;text-align:center;}
+.time-cell input{width:100%;font-size:13px;text-align:center;border:0.5px solid #ddd;border-radius:4px;background:transparent;color:#1a1a18;padding:2px 0;}
+.time-cell input:focus{outline:none;border-color:#aaa;}
+.time-cell input.has-val{background:#f5f5f3;}
+.check-icon{font-size:17px;}
+.check-icon.done{color:#1D9E75;}
+.check-icon.undone{color:#ccc;}
+.total-day-cell{padding:3px 4px;text-align:center;font-size:13px;font-weight:600;min-width:70px;}
+.day-green-light{background:#d4edda;color:#155724;}
+.day-green-dark{background:#28a745;color:#fff;}
+.day-yellow{background:#fff3cd;color:#856404;}
+.day-red{background:#f8d7da;color:#721c24;}
+.day-empty{color:#ccc;font-size:12px;}
+.prog-section{margin-top:1.25rem;}
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.prog-label{font-size:13px;color:#444;font-weight:600;width:110px;flex-shrink:0;}
+.prog-track{flex:1;height:6px;background:#e8e8e4;border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width .3s;}
+.prog-pct{font-size:13px;color:#555;width:34px;text-align:right;}
+.total-time{font-size:14px;font-weight:700;color:#1a1a18;margin-top:1rem;line-height:1.9;}
+.grand-total{margin-top:0.5rem;font-size:14px;font-weight:700;color:#1a1a18;}
+.legend{display:flex;gap:14px;font-size:13px;color:#888;margin-top:1rem;flex-wrap:wrap;}
+.color-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:0.75rem;font-size:12px;align-items:center;}
+.cl-dot{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:4px;vertical-align:middle;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Lernjournal — Bewerbung &amp; Deutsch</h1>
+  <div class="top-bar">
+    <div class="month-nav">
+      <button id="prev">&#8249;</button>
+      <div class="month-title" id="monthTitle"></div>
+      <button id="next">&#8250;</button>
+    </div>
+    <button class="btn-clear" onclick="clearMonth()">Monat löschen</button>
+  </div>
+  <div class="stats-bar" id="statsBar"></div>
+  <div class="tbl-wrap">
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th class="date-col">Datum</th>
+          <th class="grp-apply" colspan="2">Bewerbung</th>
+          <th class="grp-lang" colspan="10">Deutschlernen</th>
+          <th style="background:#f5f5f3;border-left:2px solid #bbb;font-size:13px;font-weight:700;color:#333;width:72px;">Tageszeit</th>
+        </tr>
+        <tr>
+          <th class="date-col"></th>
+          <th class="grp-apply" style="width:28px;">&#10003;</th>
+          <th class="grp-apply" style="width:48px;font-size:12px;">h:mm</th>
+          <th class="sub-first" style="width:28px;font-size:12px;">Sprechen</th>
+          <th style="width:48px;font-size:12px;">h:mm</th>
+          <th style="width:28px;font-size:12px;">Schreiben</th>
+          <th style="width:48px;font-size:12px;">h:mm</th>
+          <th style="width:28px;font-size:12px;">Shadowing</th>
+          <th style="width:48px;font-size:12px;">h:mm</th>
+          <th style="width:28px;font-size:12px;">Lesen</th>
+          <th style="width:48px;font-size:12px;">h:mm</th>
+          <th style="width:28px;font-size:12px;">Grammatik</th>
+          <th style="width:48px;font-size:12px;">h:mm</th>
+          <th style="background:#f5f5f3;border-left:2px solid #bbb;width:72px;font-size:12px;font-weight:700;color:#333;">Gesamt</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="color-legend">
+    <span style="font-size:12px;color:#555;font-weight:600;">Tageszeit:</span>
+    <span><span class="cl-dot" style="background:#f8d7da;border:1px solid #f5c6cb;"></span><span style="color:#721c24;">0 Std. — kein Fortschritt</span></span>
+    <span><span class="cl-dot" style="background:#fff3cd;border:1px solid #ffeeba;"></span><span style="color:#856404;">unter 3 Std.</span></span>
+    <span><span class="cl-dot" style="background:#d4edda;border:1px solid #c3e6cb;"></span><span style="color:#155724;">3–4 Std.</span></span>
+    <span><span class="cl-dot" style="background:#28a745;border:1px solid #1e7e34;"></span><span style="color:#155724;">über 4 Std.</span></span>
+  </div>
+  <div class="prog-section" id="progressBars"></div>
+  <div class="total-time" id="totalTimeRow"></div>
+  <div class="grand-total" id="grandTotalRow"></div>
+  <div class="legend">
+    <span><span style="font-size:17px;color:#1D9E75;">&#10003;</span> Erledigt</span>
+    <span><span style="font-size:17px;color:#ccc;">&#9675;</span> Nicht erledigt</span>
+    <span>Zeit eingeben &rarr; Haken automatisch gesetzt &nbsp;|&nbsp; Format: 1:30 = 1 Std. 30 Min.</span>
+  </div>
+</div>
+
+<script>
+const COLS=[
+  {id:'apply',label:'Bewerbung',color:'#185FA5'},
+  {id:'speak',label:'Sprechen',color:'#1D9E75'},
+  {id:'write',label:'Schreiben',color:'#534AB7'},
+  {id:'shadow',label:'Shadowing',color:'#D85A30'},
+  {id:'read',label:'Lesen',color:'#D4537E'},
+  {id:'gram',label:'Grammatik',color:'#BA7517'},
+];
+const DOW_DE=['So','Mo','Di','Mi','Do','Fr','Sa'];
+const MONTHS_DE=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+let current=new Date();
+let viewYear=current.getFullYear();
+let viewMonth=current.getMonth();
+let data={};
+
+function skey(){return 'jrnl4_'+viewYear+'_'+viewMonth;}
+function load(){try{var r=localStorage.getItem(skey());data=r?JSON.parse(r):{}}catch(e){data={};}}
+function save(){try{localStorage.setItem(skey(),JSON.stringify(data));}catch(e){}}
+
+function parseMins(str){
+  if(!str||!str.trim())return 0;
+  str=str.trim();
+  if(str.indexOf(':')!==-1){var p=str.split(':');return (parseInt(p[0])||0)*60+(parseInt(p[1])||0);}
+  var n=parseFloat(str);if(isNaN(n))return 0;
+  return n<10?Math.round(n*60):Math.round(n);
+}
+function fmtMins(m){if(!m)return '';return Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'m';}
+
+function dayTotalMins(d){
+  return COLS.reduce(function(s,c){return s+parseMins(data[d+'_'+c.id+'_time']||'');},0);
+}
+
+function toggle(day,col){
+  var k=day+'_'+col+'_done';
+  data[k]=!data[k];
+  save();renderRow(day);updateStats();
+}
+function setTime(day,col,val){
+  data[day+'_'+col+'_time']=val;
+  if(parseMins(val)>0)data[day+'_'+col+'_done']=true;
+  save();renderRow(day);updateStats();
+}
+function clearMonth(){
+  if(confirm('Alle Daten dieses Monats löschen?')){localStorage.removeItem(skey());data={};render();}}
+
+function daysInM(y,m){return new Date(y,m+1,0).getDate();}
+
+function renderRow(d){
+  var today=current;
+  var dateObj=new Date(viewYear,viewMonth,d);
+  var isFuture=dateObj>today;
+  var isToday=viewYear===today.getFullYear()&&viewMonth===today.getMonth()&&d===today.getDate();
+  var row=document.getElementById('row_'+d);
+  if(!row)return;
+  while(row.children.length>1)row.removeChild(row.lastChild);
+  row.className=isToday?'today-row':'';
+
+  COLS.forEach(function(col,i){
+    var done=!!data[d+'_'+col.id+'_done'];
+    var timeVal=data[d+'_'+col.id+'_time']||'';
+
+    var tdCheck=document.createElement('td');
+    tdCheck.className='check-cell'+(isFuture?' future':'')+(i===0?' grp-apply':'')+(i===1?' sub-first':'');
+    tdCheck.innerHTML='<span class="check-icon '+(done?'done':'undone')+'">'+(done?'&#10003;':'&#9675;')+'</span>';
+    if(!isFuture)(function(day,c){tdCheck.onclick=function(){toggle(day,c);};})(d,col.id);
+    row.appendChild(tdCheck);
+
+    var tdTime=document.createElement('td');
+    tdTime.className='time-cell'+(i===0?' grp-apply':'');
+    var inp=document.createElement('input');
+    inp.type='text';inp.placeholder='0:00';inp.value=timeVal;
+    if(timeVal)inp.className='has-val';
+    if(isFuture)inp.disabled=true;
+    (function(day,c,el){inp.onchange=function(){setTime(day,c,el.value);if(el.value)el.classList.add('has-val');else el.classList.remove('has-val');};})(d,col.id,inp);
+    tdTime.appendChild(inp);
+    row.appendChild(tdTime);
+  });
+
+  // daily total cell
+  var totalMins=dayTotalMins(d);
+  var tdTotal=document.createElement('td');
+  tdTotal.style.borderLeft='2px solid #bbb';
+  if(isFuture){
+    tdTotal.className='total-day-cell day-empty';
+    tdTotal.textContent='—';
+  } else if(totalMins===0){
+    tdTotal.className='total-day-cell day-red';
+    tdTotal.textContent='0h 00m';
+  } else if(totalMins<180){
+    tdTotal.className='total-day-cell day-yellow';
+    tdTotal.textContent=fmtMins(totalMins);
+  } else if(totalMins<=240){
+    tdTotal.className='total-day-cell day-green-light';
+    tdTotal.textContent=fmtMins(totalMins);
+  } else {
+    tdTotal.className='total-day-cell day-green-dark';
+    tdTotal.textContent=fmtMins(totalMins);
+  }
+  row.appendChild(tdTotal);
+}
+
+function updateStats(){
+  var days=daysInM(viewYear,viewMonth);
+  var today=current;
+  var pastDays=viewYear<today.getFullYear()?days:viewMonth<today.getMonth()?days:(viewYear===today.getFullYear()&&viewMonth===today.getMonth()?today.getDate():0);
+
+  var counts={apply:0,speak:0,write:0,shadow:0,read:0,gram:0};
+  var times={apply:0,speak:0,write:0,shadow:0,read:0,gram:0};
+  for(var d=1;d<=days;d++){
+    COLS.forEach(function(c){
+      if(data[d+'_'+c.id+'_done'])counts[c.id]++;
+      times[c.id]+=parseMins(data[d+'_'+c.id+'_time']||'');
+    });
+  }
+  function pct(n,t){return t===0?0:Math.round(n/t*100);}
+  var langCols=['speak','write','shadow','read','gram'];
+  var langDone=langCols.reduce(function(s,c){return s+counts[c];},0);
+
+  var statsData=[
+    {label:'Bewerbung',val:pct(counts.apply,pastDays)+'%'},
+    {label:'Deutsch ges.',val:pct(langDone,pastDays*5)+'%'},
+    {label:'Sprechen',val:pct(counts.speak,pastDays)+'%'},
+    {label:'Schreiben',val:pct(counts.write,pastDays)+'%'},
+    {label:'Shadowing',val:pct(counts.shadow,pastDays)+'%'},
+    {label:'Lesen',val:pct(counts.read,pastDays)+'%'},
+    {label:'Grammatik',val:pct(counts.gram,pastDays)+'%'},
+  ];
+  document.getElementById('statsBar').innerHTML=statsData.map(function(s){
+    return '<div class="stat-card"><div class="s-val">'+s.val+'</div><div class="s-lbl">'+s.label+'</div></div>';
+  }).join('');
+
+  document.getElementById('progressBars').innerHTML=COLS.map(function(c){
+    var v=pct(counts[c.id],pastDays);
+    return '<div class="prog-row"><div class="prog-label">'+c.label+'</div><div class="prog-track"><div class="prog-fill" style="width:'+v+'%;background:'+c.color+'"></div></div><div class="prog-pct">'+v+'%</div></div>';
+  }).join('');
+
+  // per-skill totals
+  var totalMinsAll=Object.values(times).reduce(function(a,b){return a+b;},0);
+  var tr=document.getElementById('totalTimeRow');
+  if(totalMinsAll>0){
+    var breakdown=COLS.map(function(c){return times[c.id]>0?'<span style="font-weight:700;">'+c.label+':</span> <span style="font-weight:400;color:#555;">'+fmtMins(times[c.id])+'</span>':''}).filter(Boolean).join(' &nbsp;&middot;&nbsp; ');
+    tr.innerHTML='<span style="color:#555;font-weight:400;font-size:13px;">Zeitaufwand nach Bereich: </span>'+breakdown;
+  } else {tr.innerHTML='';}
+
+  // grand total
+  var gt=document.getElementById('grandTotalRow');
+  if(totalMinsAll>0){
+    gt.innerHTML='Gesamtzeit im Monat: <span style="color:#185FA5;">'+fmtMins(totalMinsAll)+'</span>';
+  } else {gt.innerHTML='';}
+}
+
+function render(){
+  document.getElementById('monthTitle').textContent=MONTHS_DE[viewMonth]+' '+viewYear;
+  var days=daysInM(viewYear,viewMonth);
+  var today=current;
+  var tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+
+  for(var d=1;d<=days;d++){
+    var dateObj=new Date(viewYear,viewMonth,d);
+    var dow=DOW_DE[dateObj.getDay()];
+    var isToday=viewYear===today.getFullYear()&&viewMonth===today.getMonth()&&d===today.getDate();
+    var dd=String(d).padStart(2,'0');
+    var mm=String(viewMonth+1).padStart(2,'0');
+    var tr=document.createElement('tr');
+    tr.id='row_'+d;
+    tr.innerHTML='<td class="date-cell">'+dd+'.'+mm+'.'+viewYear+'<br><span class="dow">'+dow+(isToday?' heute':'')+'</span></td>';
+    tbody.appendChild(tr);
+    renderRow(d);
+  }
+  updateStats();
+}
+
+document.getElementById('prev').onclick=function(){viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--;}load();render();};
+document.getElementById('next').onclick=function(){viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++;}load();render();};
+
+load();render();
+</script>
+</body>
+</html>
